@@ -22,6 +22,15 @@ def fetch_playlist_item_page(google_api_key, playlistId, page_token=None):
     # logging.info("GOT %s", pformat(json.loads(response.text)))
     return json.loads(response.text)
 
+def fetch_video_items_page(google_api_key, video_id):
+    response = requests.get("https://www.googleapis.com/youtube/v3/videos",
+                            params={
+                                "key": google_api_key,
+                                "id": video_id,
+                                "part": "snippet, statistics"
+                            })
+    logging.info("Got video details %s", pformat(json.loads(response.text)))
+
 def fetch_playlist_item(google_api_key, playlistId, page_token=None):
     payload = fetch_playlist_item_page(google_api_key, playlistId, page_token)
 
@@ -39,7 +48,9 @@ def main():
 
     for video_item in fetch_playlist_item(google_api_key, playlistId):
         video_id = video_item['contentDetails']["videoId"]
-        logging.info("Got video_item %s", pformat(video_id))
+        logging.info("Got videoId %s", video_id)
+        fetch_video_items_page(google_api_key, video_id)
+        break
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
