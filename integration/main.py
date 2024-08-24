@@ -53,6 +53,13 @@ def fetch_video_item(google_api_key, video_id, page_token=None):
     if next_page_toke is not None:
         yield from fetch_video_item(google_api_key, video_id, next_page_toke)
 
+def video_item_format(video):
+    return {
+        "title": video["snippet"]["title"],
+        "views": video["statistics"]["viewCount"],
+        "likes": video["statistics"]["likeCount"],
+        "comments": video["statistics"]["commentCount"]
+    }
 
 def main():
     logging.info("Started!")
@@ -64,7 +71,7 @@ def main():
         video_id = video_item['contentDetails']["videoId"]
         logging.info("Got videoId %s", video_id)
         for video in fetch_video_item(google_api_key, video_id):
-            logging.info("Got video details %s", pformat(video))
+            logging.info("Got video details %s", pformat(video_item_format(video)))
         
 
 if __name__ == "__main__":
