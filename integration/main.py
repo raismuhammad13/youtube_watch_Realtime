@@ -31,8 +31,6 @@ def fetch_playlist_item(google_api_key, playlistId, page_token=None):
     if next_page_token is not None:
         yield from fetch_playlist_item(google_api_key, playlistId, next_page_token)
 
-
-
 def main():
     logging.info("Started!")
 
@@ -40,7 +38,8 @@ def main():
     playlistId = config_credentials["playlistId"]
 
     for video_item in fetch_playlist_item(google_api_key, playlistId):
-        logging.info("Got video_item %s", pformat(video_item))
+        video_id = video_item['contentDetails']["videoId"]
+        logging.info("Got video_item %s", pformat(video_id))
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
