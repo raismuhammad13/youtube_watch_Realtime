@@ -71,7 +71,8 @@ def main():
         video_id = video_item['contentDetails']["videoId"]
         logging.info("Got videoId %s", video_id)
         for video in fetch_video_item(google_api_key, video_id):
-            logging.info("Got video details %s", pformat(video_item_format(video)))
+            video_data = video_item_format(video)
+            logging.info("Got video details %s", pformat(video_data))
         
 
 if __name__ == "__main__":
