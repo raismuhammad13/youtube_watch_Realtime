@@ -6,6 +6,7 @@ import os
 import requests
 import json
 from pprint import pformat
+from kafka import KafkaProducer
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'setup')))
 
@@ -64,6 +65,8 @@ def video_item_format(video):
 def main():
     logging.info("Started!")
 
+    producer = KafkaProducer(bootstrap_servers=["localhost:9092"], max_block_ms=5000)
+
     google_api_key = config_credentials["google_api_key"]
     playlistId = config_credentials["playlistId"]
 
@@ -72,7 +75,11 @@ def main():
         logging.info("Got videoId %s", video_id)
         for video in fetch_video_item(google_api_key, video_id):
             video_data = video_item_format(video)
-            logging.info("Got video details %s", pformat(video_data))
+
+            # producer.send('user_created', json.dumps(res).encode('utf-8'))
+            producer.send("youtube_video_item", json.dumps(video_data).encode("utf-8"))
+            
+            logging.info("Sending %s successfully", pformat(video_data))
         
 
 if __name__ == "__main__":
