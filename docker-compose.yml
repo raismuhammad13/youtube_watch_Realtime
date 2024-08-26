@@ -16,7 +16,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - confluent 
+      - spark-network 
     
   broker:
     image: confluentinc/cp-server:7.4.0
@@ -48,7 +48,7 @@ services:
       CONFLUENT_METRICS_ENABLE: 'false'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
     networks:
-      - confluent
+      - spark-network
     healthcheck:
       test: [ "CMD", "bash", "-c", 'nc -z localhost 9092' ]
       interval: 10s
@@ -68,7 +68,7 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
     networks:
-      - confluent
+      - spark-network
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8081/" ]
       interval: 30s
@@ -96,12 +96,37 @@ services:
       CONFLIENT_METRICS_ENABLE: 'false'
       PORT: 9021
     networks:
-      - confluent
+      - spark-network
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9021/health" ]
       interval: 30s
       timeout: 10s
       retries: 5
 
+  spark-master:
+    image: bitnami/spark:latest
+    command: bin/spark-class org.apache.spark.deploy.master.Master
+    hostname: spark-master
+    container_name: spark-master
+    ports:
+      - "9090:8080"
+      - "7077:7077"
+    networks:
+      - spark-network
+
+  spark-worker:
+    image: bitnami/spark:latest
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    depends_on:
+      - spark-master
+    environment:
+      SPARK_MODE: worker
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 1g
+      SPARK_MASTER_URL: spark://spark-master:7077
+    networks:
+      - spark-network
+
 networks:
-  confluent:
+  spark-network:
+    driver: bridge
